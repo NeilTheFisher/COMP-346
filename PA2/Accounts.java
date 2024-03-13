@@ -17,8 +17,6 @@ public class Accounts {
     private String lastName; /* Last name of account holder */
     private double balance; /* Account balance */
 
-    private boolean inUse = false; /* Account in use */
-
     /** 
     * Constructor method of Accounts class
     * 
@@ -141,13 +139,5 @@ public class Accounts {
     public String toString() {
         return ("\n Account number " + getAccountNumber() + "Account type " + getAccountType() + "First name "
                 + getFirstName() + "Last Name " + getLastName() + "Balance " + getBalance());
-    }
-
-    public boolean isInUse() {
-        return inUse;
-    }
-
-    public void setInUse(boolean inUse) {
-        this.inUse = inUse;
     }
 }

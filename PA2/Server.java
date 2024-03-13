@@ -306,52 +306,25 @@ public class Server extends Thread {
      * @return balance
      * @param i, amount
      */
-    public double deposit(int i, double amount) {
-        synchronized (account[i]) {
-            // wait if the account is being updated by the other thread
-            while (account[i].isInUse()) {
-                System.out.println("\n DEBUG : Server.deposit - " + "i " + i + " waiting " + getServerThreadId());
-                try {
-                    account[i].wait();
-                } catch (InterruptedException e) {
+    public synchronized double deposit(int i, double amount) {
+        double curBalance = account[i].getBalance(); /* Get current account balance */
 
-                }
+        /* NEW : A server thread is blocked before updating the 10th , 20th, ... 70th account balance in order to simulate an inconsistency situation */
+        if (((i + 1) % 10) == 0) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+
             }
-
-            // start using the account
-            account[i].setInUse(true);
-
-            double curBalance = account[i].getBalance(); /* Get current account balance */
-
-            /* NEW : A server thread is blocked before updating the 10th , 20th, ... 70th account balance in order to simulate an inconsistency situation */
-            if (((i + 1) % 10) == 0) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-
-                }
-            }
-
-            System.out.println("\n DEBUG : Server.deposit - " + "i " + i + " Current balance " + curBalance + " Amount "
-                    + amount + " " + getServerThreadId());
-
-            /* critical section */
-
-            /* Deposit amount in the account */
-            account[i].setBalance(curBalance + amount);
-
-            double balance = account[i].getBalance();
-
-            /* end critical section */
-
-            // stop using the account
-            // account[i].setInUse(false);
-
-            // notify all threads waiting on the account object
-            account[i].notify();
-
-            return balance;/* Return updated account balance */
         }
+
+        System.out.println("\n DEBUG : Server.deposit - " + "i " + i + " Current balance " + curBalance + " Amount "
+                + amount + " " + getServerThreadId());
+
+        /* Deposit amount in the account */
+        account[i].setBalance(curBalance + amount);
+
+        return account[i].getBalance();
     }
 
     /**
@@ -361,43 +334,16 @@ public class Server extends Thread {
      * @param i, amount
      */
 
-    public double withdraw(int i, double amount) {
-        synchronized (account[i]) {
-            // wait if the account is being updated by the other thread
-            while (account[i].isInUse()) {
-                try {
-                    account[i].wait();
-                } catch (InterruptedException e) {
+    public synchronized double withdraw(int i, double amount) {
+        double curBalance = account[i].getBalance(); /* Get current account balance */
 
-                }
-            }
+        System.out
+                .println("\n DEBUG : Server.withdraw - " + "i " + i + " Current balance " + curBalance + " Amount "
+                        + amount + " " + getServerThreadId());
 
-            // start using the account
-            account[i].setInUse(true);
+        account[i].setBalance(curBalance - amount); /* Withdraw amount in the account */
 
-            /* critical section */
-
-            double curBalance = account[i].getBalance(); /* Get current account balance */
-
-            System.out
-                    .println("\n DEBUG : Server.withdraw - " + "i " + i + " Current balance " + curBalance + " Amount "
-                            + amount + " " + getServerThreadId());
-
-            account[i].setBalance(curBalance - amount); /* Withdraw amount in the account */
-
-            double balance = account[i].getBalance();
-
-            /* end critical section */
-
-            // stop using the account
-            // account[i].setInUse(false);
-
-            // notify all threads waiting on the account object
-            account[i].notify();
-
-            return balance;/* Return updated account balance */
-        }
-
+        return account[i].getBalance();
     }
 
     /**
@@ -407,37 +353,14 @@ public class Server extends Thread {
      * @param i
      */
 
-    public double query(int i) {
-        synchronized (account[i]) {
-            // wait if the account is being updated by the other thread
-            while (account[i].isInUse()) {
-                try {
-                    account[i].wait();
-                } catch (InterruptedException e) {
+    public synchronized double query(int i) {
+        double curBalance = account[i].getBalance(); /* Get current account balance */
 
-                }
-            }
+        System.out.println(
+                "\n DEBUG : Server.query - " + "i " + i + " Current balance " + curBalance + " "
+                        + getServerThreadId());
 
-            // start using the account
-            account[i].setInUse(true);
-
-            /* critical section */
-            double curBalance = account[i].getBalance(); /* Get current account balance */
-
-            System.out.println(
-                    "\n DEBUG : Server.query - " + "i " + i + " Current balance " + curBalance + " "
-                            + getServerThreadId());
-
-            /* end critical section */
-
-            // stop using the account
-            // account[i].setInUse(false);
-
-            // notify all threads waiting on the account object
-            account[i].notify();
-
-            return curBalance;/* Return updated account balance */
-        }
+        return curBalance;
     }
 
     /**
