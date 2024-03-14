@@ -4,6 +4,8 @@
  * and open the template in the editor.
  */
 
+import java.util.concurrent.Semaphore;
+
 /** Network class
  *
  * @author Kerly Titus
@@ -20,6 +22,9 @@ public class Network extends Thread {
     private static String serverConnectionStatus; /* Server connection status - connected, disconnected, idle */
     private static Transactions inComingPacket[]; /* Incoming network buffer */
     private static Transactions outGoingPacket[]; /* Outgoing network buffer */
+    private static Semaphore inBufferAvailable, outBufferAvailable; /* Semaphores for the network buffers */
+    private static Semaphore inBufferFull, outBufferFull; /* Semaphores for the network buffers */
+    private static Semaphore inMutex, outMutex; /* Semaphores for the network buffers */
     private static String inBufferStatus,
             outBufferStatus; /* Current status of the network buffers - normal, full, empty */
     private static String networkStatus; /* Network status - active, inactive */
@@ -46,6 +51,12 @@ public class Network extends Thread {
             inComingPacket[i] = new Transactions();
             outGoingPacket[i] = new Transactions();
         }
+        inBufferAvailable = new Semaphore(maxNbPackets);
+        inBufferFull = new Semaphore(0);
+        inMutex = new Semaphore(1);
+        outBufferAvailable = new Semaphore(maxNbPackets);
+        outBufferFull = new Semaphore(0);
+        outMutex = new Semaphore(1);
         inBufferStatus = "empty";
         outBufferStatus = "empty";
         inputIndexClient = 0;
@@ -316,6 +327,78 @@ public class Network extends Thread {
         maxNbPackets = maxPackets;
     }
 
+    private static void acquireInBufferAvailable() {
+        try {
+            inBufferAvailable.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void releaseInBufferAvailable() {
+        inBufferAvailable.release();
+    }
+
+    private static void acquireOutBufferAvailable() {
+        try {
+            outBufferAvailable.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void releaseOutBufferAvailable() {
+        outBufferAvailable.release();
+    }
+
+    private static void acquireInBufferFull() {
+        try {
+            inBufferFull.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void releaseInBufferFull() {
+        inBufferFull.release();
+    }
+
+    private static void acquireOutBufferFull() {
+        try {
+            outBufferFull.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void releaseOutBufferFull() {
+        outBufferFull.release();
+    }
+
+    private static void acquireInMutex() {
+        try {
+            inMutex.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void releaseInMutex() {
+        inMutex.release();
+    }
+
+    private static void acquireOutMutex() {
+        try {
+            outMutex.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void releaseOutMutex() {
+        outMutex.release();
+    }
+
     /**
      *  Transmitting the transactions from the client to the server through the network 
      *  
@@ -324,6 +407,8 @@ public class Network extends Thread {
      * 
      */
     public static boolean send(Transactions inPacket) {
+        acquireInBufferAvailable();
+        acquireInMutex();
 
         inComingPacket[inputIndexClient].setAccountNumber(inPacket.getAccountNumber());
         inComingPacket[inputIndexClient].setOperationType(inPacket.getOperationType());
@@ -346,6 +431,9 @@ public class Network extends Thread {
             setInBufferStatus("normal");
         }
 
+        releaseInBufferFull();
+        releaseInMutex();
+
         return true;
     }
 
@@ -355,6 +443,9 @@ public class Network extends Thread {
     * 
     */
     public static boolean receive(Transactions outPacket) {
+        // wait until the output buffer is not empty by using the semaphore
+        acquireOutBufferFull();
+        acquireOutMutex();
 
         outPacket.setAccountNumber(outGoingPacket[outputIndexClient].getAccountNumber());
         outPacket.setOperationType(outGoingPacket[outputIndexClient].getOperationType());
@@ -377,6 +468,9 @@ public class Network extends Thread {
             setOutBufferStatus("normal");
         }
 
+        releaseOutBufferAvailable();
+        releaseOutMutex();
+
         return true;
     }
 
@@ -388,6 +482,8 @@ public class Network extends Thread {
      * 
      */
     public static boolean transferOut(Transactions outPacket) {
+        acquireOutBufferAvailable();
+        acquireOutMutex();
 
         outGoingPacket[inputIndexServer].setAccountNumber(outPacket.getAccountNumber());
         outGoingPacket[inputIndexServer].setOperationType(outPacket.getOperationType());
@@ -410,6 +506,9 @@ public class Network extends Thread {
             setOutBufferStatus("normal");
         }
 
+        releaseOutBufferFull();
+        releaseOutMutex();
+
         return true;
     }
 
@@ -420,6 +519,8 @@ public class Network extends Thread {
      * 
      */
     public static boolean transferIn(Transactions inPacket) {
+        acquireInBufferFull();
+        acquireInMutex();
 
         inPacket.setAccountNumber(inComingPacket[outputIndexServer].getAccountNumber());
         inPacket.setOperationType(inComingPacket[outputIndexServer].getOperationType());
@@ -441,6 +542,9 @@ public class Network extends Thread {
         } else {
             setInBufferStatus("normal");
         }
+
+        releaseInBufferAvailable();
+        releaseInMutex();
 
         return true;
     }

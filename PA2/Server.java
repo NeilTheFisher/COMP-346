@@ -242,14 +242,13 @@ public class Server extends Thread {
         int accIndex; /* Index position of account to update */
         double newBalance; /* Updated account balance */
 
-        /* System.out.println("\n DEBUG : Server.processTransactions() " + getServerThreadId() ); */
+        System.out.println("\n DEBUG : Server.processTransactions() " + getServerThreadId());
 
         /* Process the accounts until the client disconnects */
         while ((!Network.getClientConnectionStatus().equals("disconnected"))) {
-            while ((Network.getInBufferStatus().equals("empty")
-                    && !Network.getClientConnectionStatus().equals("disconnected"))) {
-                Thread.yield(); /* Yield the cpu if the network input buffer is empty */
-            }
+            // while (Network.getInBufferStatus().equals("empty")) {
+            //     Thread.yield(); /* Yield the cpu if the network input buffer is empty */
+            // }
 
             if (!Network.getInBufferStatus().equals("empty")) {
                 /* System.out.println("\n DEBUG : Server.processTransactions() - transferring in account " + trans.getAccountNumber()); */
@@ -282,9 +281,9 @@ public class Server extends Thread {
                     /* System.out.println("\n DEBUG : Server.processTransactions() - Obtaining balance from account" + trans.getAccountNumber()); */
                 }
 
-                while (Network.getOutBufferStatus().equals("full")) {
-                    Thread.yield(); /* Yield the cpu if the network output buffer is full */
-                }
+                // while (Network.getOutBufferStatus().equals("full")) {
+                //     Thread.yield(); /* Yield the cpu if the network output buffer is full */
+                // }
 
                 /* System.out.println("\n DEBUG : Server.processTransactions() - transferring out account " + trans.getAccountNumber()); */
 
