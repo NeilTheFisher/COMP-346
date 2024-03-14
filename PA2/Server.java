@@ -11,7 +11,8 @@ import java.util.Scanner;
  */
 /*package comp546pa1w2020;*/
 
-/** Server class
+/**
+ * Server class
  *
  * @author Kerly Titus
  */
@@ -23,15 +24,19 @@ public class Server extends Thread {
     private static int numberOfAccounts; /* Number of accounts stored in the server */
     private static int maxNbAccounts; /* maximum number of transactions */
     private static Accounts[] account; /* Accounts to be accessed or updated */
-    /* NEW : member variabes to be used in PA2 with appropriate accessor and mutator methods */
+    /*
+     * NEW : member variabes to be used in PA2 with appropriate accessor and mutator
+     * methods
+     */
     private String serverThreadId; /* Identification of the two server threads - Thread1, Thread2 */
     private static String serverThreadRunningStatus1; /* Running status of thread 1 - idle, running, terminated */
     private static String serverThreadRunningStatus2; /* Running status of thread 2 - idle, running, terminated */
+    private static String serverThreadRunningStatus3; /* Running status of thread 3 - idle, running, terminated */
 
-    /** 
+    /**
      * Constructor method of Client class
      * 
-     * @return 
+     * @return
      * @param stid
      */
     Server(String stid) {
@@ -56,7 +61,7 @@ public class Server extends Thread {
         }
     }
 
-    /** 
+    /**
      * Accessor method of Server class
      * 
      * @return numberOfTransactions
@@ -66,17 +71,17 @@ public class Server extends Thread {
         return numberOfTransactions;
     }
 
-    /** 
+    /**
      * Mutator method of Server class
      * 
-     * @return 
+     * @return
      * @param nbOfTrans
      */
     public void setNumberOfTransactions(int nbOfTrans) {
         numberOfTransactions = nbOfTrans;
     }
 
-    /** 
+    /**
      * Accessor method of Server class
      * 
      * @return numberOfAccounts
@@ -86,17 +91,17 @@ public class Server extends Thread {
         return numberOfAccounts;
     }
 
-    /** 
+    /**
      * Mutator method of Server class
      * 
-     * @return 
+     * @return
      * @param nbOfAcc
      */
     public void setNumberOfAccounts(int nbOfAcc) {
         numberOfAccounts = nbOfAcc;
     }
 
-    /** 
+    /**
      * Accessor method of Server class
      * 
      * @return maxNbAccounts
@@ -106,17 +111,17 @@ public class Server extends Thread {
         return maxNbAccounts;
     }
 
-    /** 
+    /**
      * Mutator method of Server class
      * 
-     * @return 
+     * @return
      * @param nbOfAcc
      */
     public void setMaxNbAccounts(int nbOfAcc) {
         maxNbAccounts = nbOfAcc;
     }
 
-    /** 
+    /**
      * Accessor method of Server class
      * 
      * @return serverThreadId
@@ -126,17 +131,17 @@ public class Server extends Thread {
         return serverThreadId;
     }
 
-    /** 
+    /**
      * Mutator method of Server class
      * 
-     * @return 
+     * @return
      * @param tId
      */
     public void setServerThreadId(String stid) {
         serverThreadId = stid;
     }
 
-    /** 
+    /**
      * Accessor method of Server class
      * 
      * @return serverThreadRunningStatus1
@@ -146,17 +151,17 @@ public class Server extends Thread {
         return serverThreadRunningStatus1;
     }
 
-    /** 
+    /**
      * Mutator method of Server class
      * 
-     * @return 
+     * @return
      * @param runningStatus
      */
     public void setServerThreadRunningStatus1(String runningStatus) {
         serverThreadRunningStatus1 = runningStatus;
     }
 
-    /** 
+    /**
      * Accessor method of Server class
      * 
      * @return serverThreadRunningStatus2
@@ -166,20 +171,40 @@ public class Server extends Thread {
         return serverThreadRunningStatus2;
     }
 
-    /** 
+    /**
      * Mutator method of Server class
      * 
-     * @return 
+     * @return
      * @param runningStatus
      */
     public void setServerThreadRunningStatus2(String runningStatus) {
         serverThreadRunningStatus2 = runningStatus;
     }
 
-    /** 
+    /**
+     * Accessor method of Server class
+     * 
+     * @return serverThreadRunningStatus2
+     * @param
+     */
+    public String getServerThreadRunningStatus3() {
+        return serverThreadRunningStatus3;
+    }
+
+    /**
+     * Mutator method of Server class
+     * 
+     * @return
+     * @param runningStatus
+     */
+    public void setServerThreadRunningStatus3(String runningStatus) {
+        serverThreadRunningStatus3 = runningStatus;
+    }
+
+    /**
      * Initialization of the accounts from an input file
      * 
-     * @return 
+     * @return
      * @param
      */
     public void initializeAccounts() {
@@ -209,13 +234,16 @@ public class Server extends Thread {
         }
         setNumberOfAccounts(i); /* Record the number of accounts processed */
 
-        /* System.out.println("\n DEBUG : Server.initializeAccounts() " + getNumberOfAccounts() + " accounts processed"); */
+        /*
+         * System.out.println("\n DEBUG : Server.initializeAccounts() " +
+         * getNumberOfAccounts() + " accounts processed");
+         */
 
         inputStream.close();
     }
 
-    /** 
-     * Find and return the index position of an account 
+    /**
+     * Find and return the index position of an account
      * 
      * @return account index position or -1
      * @param accNumber
@@ -232,10 +260,10 @@ public class Server extends Thread {
             return i;
     }
 
-    /** 
+    /**
      * Processing of the transactions
      * 
-     * @return 
+     * @return
      * @param trans
      */
     public boolean processTransactions(Transactions trans) {
@@ -247,11 +275,15 @@ public class Server extends Thread {
         /* Process the accounts until the client disconnects */
         while ((!Network.getClientConnectionStatus().equals("disconnected"))) {
             // while (Network.getInBufferStatus().equals("empty")) {
-            //     Thread.yield(); /* Yield the cpu if the network input buffer is empty */
+            // Thread.yield(); /* Yield the cpu if the network input buffer is empty */
             // }
 
             if (!Network.getInBufferStatus().equals("empty")) {
-                /* System.out.println("\n DEBUG : Server.processTransactions() - transferring in account " + trans.getAccountNumber()); */
+                /*
+                 * System.out.
+                 * println("\n DEBUG : Server.processTransactions() - transferring in account "
+                 * + trans.getAccountNumber());
+                 */
 
                 Network.transferIn(trans); /* Transfer a transaction from the network input buffer */
 
@@ -262,7 +294,10 @@ public class Server extends Thread {
                     trans.setTransactionBalance(newBalance);
                     trans.setTransactionStatus("done");
 
-                    /* System.out.println("\n DEBUG : Server.processTransactions() - Deposit of " + trans.getTransactionAmount() + " in account " + trans.getAccountNumber()); */
+                    /*
+                     * System.out.println("\n DEBUG : Server.processTransactions() - Deposit of " +
+                     * trans.getTransactionAmount() + " in account " + trans.getAccountNumber());
+                     */
                 } else
                 /* Process withdraw operation */
                 if (trans.getOperationType().equals("WITHDRAW")) {
@@ -270,7 +305,11 @@ public class Server extends Thread {
                     trans.setTransactionBalance(newBalance);
                     trans.setTransactionStatus("done");
 
-                    /* System.out.println("\n DEBUG : Server.processTransactions() - Withdrawal of " + trans.getTransactionAmount() + " from account " + trans.getAccountNumber()); */
+                    /*
+                     * System.out.println("\n DEBUG : Server.processTransactions() - Withdrawal of "
+                     * + trans.getTransactionAmount() + " from account " +
+                     * trans.getAccountNumber());
+                     */
                 } else
                 /* Process query operation */
                 if (trans.getOperationType().equals("QUERY")) {
@@ -278,28 +317,41 @@ public class Server extends Thread {
                     trans.setTransactionBalance(newBalance);
                     trans.setTransactionStatus("done");
 
-                    /* System.out.println("\n DEBUG : Server.processTransactions() - Obtaining balance from account" + trans.getAccountNumber()); */
+                    /*
+                     * System.out.
+                     * println("\n DEBUG : Server.processTransactions() - Obtaining balance from account"
+                     * + trans.getAccountNumber());
+                     */
                 }
 
                 // while (Network.getOutBufferStatus().equals("full")) {
-                //     Thread.yield(); /* Yield the cpu if the network output buffer is full */
+                // Thread.yield(); /* Yield the cpu if the network output buffer is full */
                 // }
 
-                /* System.out.println("\n DEBUG : Server.processTransactions() - transferring out account " + trans.getAccountNumber()); */
+                /*
+                 * System.out.
+                 * println("\n DEBUG : Server.processTransactions() - transferring out account "
+                 * + trans.getAccountNumber());
+                 */
 
                 Network.transferOut(
-                        trans); /* Transfer a completed transaction from the server to the network output buffer */
+                        trans); /*
+                                 * Transfer a completed transaction from the server to the network output buffer
+                                 */
                 setNumberOfTransactions(
                         (getNumberOfTransactions() + 1)); /* Count the number of transactions processed */
             }
         }
 
-        /* System.out.println("\n DEBUG : Server.processTransactions() - " + getNumberOfTransactions() + " accounts updated"); */
+        /*
+         * System.out.println("\n DEBUG : Server.processTransactions() - " +
+         * getNumberOfTransactions() + " accounts updated");
+         */
 
         return true;
     }
 
-    /** 
+    /**
      * Processing of a deposit operation in an account
      * 
      * @return balance
@@ -308,7 +360,10 @@ public class Server extends Thread {
     public synchronized double deposit(int i, double amount) {
         double curBalance = account[i].getBalance(); /* Get current account balance */
 
-        /* NEW : A server thread is blocked before updating the 10th , 20th, ... 70th account balance in order to simulate an inconsistency situation */
+        /*
+         * NEW : A server thread is blocked before updating the 10th , 20th, ... 70th
+         * account balance in order to simulate an inconsistency situation
+         */
         if (((i + 1) % 10) == 0) {
             try {
                 Thread.sleep(100);
@@ -327,7 +382,7 @@ public class Server extends Thread {
     }
 
     /**
-     *  Processing of a withdrawal operation in an account
+     * Processing of a withdrawal operation in an account
      * 
      * @return balance
      * @param i, amount
@@ -346,7 +401,7 @@ public class Server extends Thread {
     }
 
     /**
-     *  Processing of a query operation in an account
+     * Processing of a query operation in an account
      * 
      * @return balance
      * @param i
@@ -363,10 +418,10 @@ public class Server extends Thread {
     }
 
     /**
-     *  Create a String representation based on the Server Object
-    * 
-    * @return String representation
-    */
+     * Create a String representation based on the Server Object
+     * 
+     * @return String representation
+     */
     public String toString() {
         return ("\n server IP " + Network.getServerIP() + "connection status " + Network.getServerConnectionStatus()
                 + "Number of accounts " + getNumberOfAccounts());
@@ -375,11 +430,12 @@ public class Server extends Thread {
     /**
      * Code for the run method
      * 
-     * @return 
+     * @return
      * @param
      */
 
     public void run() {
+
         Transactions trans = new Transactions();
 
         long serverStartTime = System.currentTimeMillis();
@@ -393,19 +449,33 @@ public class Server extends Thread {
 
         if (getServerThreadId().equals("1")) {
             setServerThreadRunningStatus1("terminated");
-
-            // wait for both threads to terminate, then disconnect the network
-            while (!getServerThreadRunningStatus2().equals("terminated")) {
-                Thread.yield();
-            }
-        } else {
+        } else if (getServerThreadId().equals("2")) {
             setServerThreadRunningStatus2("terminated");
-
-            // wait for both threads to terminate, then disconnect the network
-            while (!getServerThreadRunningStatus1().equals("terminated")) {
-                Thread.yield();
-            }
+        } else {
+            setServerThreadRunningStatus3("terminated");
         }
+
+        while (!getServerThreadRunningStatus1().equals("terminated")
+                && !getServerThreadRunningStatus2().equals("terminated")
+                && !getServerThreadRunningStatus3().equals("terminated")) {
+            Thread.yield();
+        }
+
+        // if (getServerThreadId().equals("1")) {
+        // setServerThreadRunningStatus1("terminated");
+
+        // // wait for both threads to terminate, then disconnect the network
+        // while (!getServerThreadRunningStatus2().equals("terminated")) {
+        // Thread.yield();
+        // }
+        // } else {
+        // setServerThreadRunningStatus2("terminated");
+
+        // // wait for both threads to terminate, then disconnect the network
+        // while (!getServerThreadRunningStatus1().equals("terminated")) {
+        // Thread.yield();
+        // }
+        // }
 
         Network.disconnect(Network.getServerIP());
     }

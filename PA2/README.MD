@@ -1,0 +1,1 @@
+Going from 2 to 3 threads reduces the runtime of the server and client by approx. 100ms
